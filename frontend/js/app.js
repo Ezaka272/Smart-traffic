@@ -131,7 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const API_URL = window.location.hostname === "localhost"
   ? "http://localhost:3000"
-  : "https://TON-BACKEND.onrender.com";
+  : "https://smart-traffic-backend-suuw.onrender.com";
 
 const res = await fetch(`${API_URL}/api/analyze`, {
   method: "POST",
