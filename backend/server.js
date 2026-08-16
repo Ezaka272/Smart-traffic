@@ -53,6 +53,44 @@ app.post('/api/analyze', async (req, res) => {
   }
 });
 
+app.get('/api/test-gemini', async (req, res) => {
+  try {
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    if (!apiKey) {
+      return res.status(500).json({
+        error: "GEMINI_API_KEY absente"
+      });
+    }
+
+    const response = await askGemini(
+      {
+        counts: {
+          north: 10,
+          east: 5,
+          south: 3,
+          west: 2
+        },
+        ringCount: 20,
+        avgWait: 15,
+        maxWait: 30,
+        threshold: 8,
+        currentGreen: "ns"
+      },
+      null,
+      apiKey
+    );
+
+    res.json(response);
+
+  } catch (error) {
+    console.error("TEST GEMINI :", error);
+
+    res.status(500).json({
+      error: error.message
+    });
+  }
+});
 app.listen(PORT,"0.0.0.0", () => {
   console.log(`🚀 Backend Smart Traffic en écoute sur http://localhost:${PORT}`);
 });

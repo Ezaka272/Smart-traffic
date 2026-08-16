@@ -74,7 +74,7 @@ Réponds UNIQUEMENT avec un objet JSON : {"priority":"...","greenDuration":00,"r
 
   try {
     const response = await ai.models.generateContent({
-        model: "google/gemini-3.5-flash",
+        model: "google/gemini-2.5-flash",
          contents: prompt,
          config: {
         responseMimeType: "application/json",
@@ -104,14 +104,21 @@ Réponds UNIQUEMENT avec un objet JSON : {"priority":"...","greenDuration":00,"r
     weather,
   };
 
-  } catch (error) {
-    console.error("Erreur Gemini :", error);
+    } catch (error) {
+    console.error("========== ERREUR GEMINI ==========");
+    console.error("Message :", error.message);
+    console.error("Status :", error.status);
+    console.error("Status code :", error.statusCode);
+    console.error("Nom :", error.name);
+    console.error("Erreur complète :", JSON.stringify(error, null, 2));
+    console.error("===================================");
 
-  if (error.status === 429) {
-    throw new Error("Trop de requêtes Gemini. Réessayez dans un instant.");
+    if (error.status === 429 || error.statusCode === 429) {
+      throw new Error("Trop de requêtes Gemini. Réessayez dans un instant.");
+    }
+
+    throw new Error("Impossible d'obtenir une décision de Gemini");
   }
-  throw new Error("Impossible d'obtenir une décision de Gemini");
-  } 
   
 }
 
