@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Traffic — Rond-point piloté par IA</title>
+  <meta name="description" content="Simulation temps réel d'un rond-point : feux tricolores, priorité à l'anneau, files d'attente et décisions Gemini dès que la congestion dépasse le seuil.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Space+Grotesk:wght@300..700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="hero-surface">
+  <div class="container">
+    <header class="panel header-panel">
+      <div>
+        <h1 class="header-title">🚦 Smart Traffic</h1>
+        <p class="header-sub">Gestion intelligente d'un rond-point — feux tricolores adaptatifs et arbitrage Gemini</p>
+      </div>
+      <div class="status-badge">
+        <span id="status-dot" class="dot live-dot green"></span>
+        <span id="status-text">Simulation active</span>
+      </div>
+    </header>
+
+    <main class="main-grid">
+      <section class="panel p-6">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Carrefour giratoire</h2>
+            <p class="section-sub">Priorité à l'anneau · sortie choisie à l'entrée</p>
+          </div>
+          <div class="phase-badge">
+            <span id="phase-dot" class="dot green"></span>
+            <span id="phase-label">Vert Nord / Sud · 8.0 s</span>
+          </div>
+        </div>
+
+        <div class="canvas-container">
+          <canvas id="simCanvas" aria-label="Simulation du rond-point avec feux tricolores" role="img"></canvas>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Véhicules passés</div>
+            <div id="stat-passed" class="stat-value">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Dans l'anneau</div>
+            <div id="stat-ring" class="stat-value">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Attente moyenne</div>
+            <div id="stat-avgwait" class="stat-value">0.0 s</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Attente max</div>
+            <div id="stat-maxwait" class="stat-value">0.0 s</div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="aside-stack">
+        <div class="panel p-5">
+          <h3 class="panel-title">Trafic par branche</h3>
+          <div class="queue-list">
+            <div class="queue-item" data-dir="north">
+              <div class="queue-meta">
+                <span class="queue-dir">
+                  <span class="dot light-dot red"></span> Nord
+                  <span class="priority-tag hidden">priorité</span>
+                </span>
+                <strong class="queue-count">0</strong>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
+            </div>
+            <div class="queue-item" data-dir="east">
+              <div class="queue-meta">
+                <span class="queue-dir">
+                  <span class="dot light-dot red"></span> Est
+                  <span class="priority-tag hidden">priorité</span>
+                </span>
+                <strong class="queue-count">0</strong>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
+            </div>
+            <div class="queue-item" data-dir="south">
+              <div class="queue-meta">
+                <span class="queue-dir">
+                  <span class="dot light-dot green"></span> Sud
+                  <span class="priority-tag hidden">priorité</span>
+                </span>
+                <strong class="queue-count">0</strong>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
+            </div>
+            <div class="queue-item" data-dir="west">
+              <div class="queue-meta">
+                <span class="queue-dir">
+                  <span class="dot light-dot green"></span> Ouest
+                  <span class="priority-tag hidden">priorité</span>
+                </span>
+                <strong class="queue-count">0</strong>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" style="width: 0%"></div></div>
+            </div>
+          </div>
+          <p class="queue-info">
+            Seuil de congestion : <strong id="threshold-val-text">8</strong> véhicules en attente.
+          </p>
+        </div>
+
+        <div id="ai-panel" class="panel p-5">
+          <div class="ai-header">
+            <h3 class="panel-title">Décision IA</h3>
+            <span id="ai-source" class="badge-tag">VEILLE</span>
+          </div>
+          <div id="ai-content">
+            <p class="ai-idle-text">
+              Surveillance du trafic. L'IA intervient dès qu'une branche dépasse le seuil de congestion.
+            </p>
+          </div>
+        </div>
+
+        <div class="panel p-5 space-y-4">
+          <h3 class="panel-title">Réglages</h3>
+          <div class="control-group">
+            <div class="control-label">
+              <span>Débit</span>
+              <span id="spawn-rate-val" class="mono">14 véh/min</span>
+            </div>
+            <input type="range" id="spawnRate" min="2" max="40" step="1" value="14">
+          </div>
+          <div class="control-group">
+            <div class="control-label">
+              <span>Seuil de congestion</span>
+              <span id="threshold-val" class="mono">8 véh</span>
+            </div>
+            <input type="range" id="threshold" min="3" max="20" step="1" value="8">
+          </div>
+          <div class="control-group">
+            <div class="control-label">
+              <span>Vitesse</span>
+              <span id="speed-val" class="mono">1.0×</span>
+            </div>
+            <input type="range" id="speed" min="0.25" max="3" step="0.25" value="1">
+          </div>
+          <label class="checkbox-card">
+            <span>Intervention automatique de l'IA</span>
+            <input type="checkbox" id="autoAi" checked>
+          </label>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="panel footer-panel">
+      <button id="btn-toggle" class="btn btn-primary">⏸ Pause</button>
+      <button id="btn-reset" class="btn btn-secondary">↻ Réinitialiser</button>
+      <button id="btn-inject" class="btn btn-secondary">🚗 Injecter du trafic</button>
+      <button id="btn-analyze" class="btn btn-primary btn-ml-auto">🤖 Analyser maintenant</button>
+    </footer>
+  </div>
+
+  <div id="toast-container"></div>
+
+  <script src="js/engine.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
