@@ -30,7 +30,7 @@ app.post('/api/analyze', async (req, res) => {
   try {
     const input = schema.parse(req.body);
     const weather = await getWeather(input.latitude ?? -18.8792, input.longitude ?? 47.5079);
-    const apiKey = process.env.LOVABLE_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
       const decision = fallbackDecision(input, weather);

@@ -129,11 +129,15 @@ document.addEventListener("DOMContentLoaded", () => {
         currentGreen: s.activeGroup,
       };
 
-      const res = await fetch("http://localhost:3000/api/analyze", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const API_URL = window.location.hostname === "localhost"
+  ? "http://localhost:3000"
+  : "https://TON-BACKEND.onrender.com";
+
+const res = await fetch(`${API_URL}/api/analyze`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(payload),
+});
 
       if (!res.ok) throw new Error(`Erreur API Server: ${res.statusText}`);
 
