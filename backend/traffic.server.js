@@ -74,8 +74,8 @@ Réponds UNIQUEMENT avec un objet JSON : {"priority":"...","greenDuration":00,"r
 
   try {
     const response = await ai.models.generateContent({
-        model: "google/gemini-3.5-flash-preview",
-         content: prompt,
+        model: "google/gemini-2.5-flash",
+         contents: prompt,
          config: {
         responseMimeType: "application/json",
       },
